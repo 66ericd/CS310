@@ -82,16 +82,11 @@ def evaluatepred():
     sensitive_attributes = request.form.get('sensitiveAttributes')
     outcome_column = request.form.get('outcomeColumn')
     positive_outcome = request.form.get('positiveOutcome')
+    prediction_column = request.form.get('predictionsColumn')
     for attribute in sensitive_attributes.split(","):
-        resultset = fairness.outcome_summary(df, attribute, outcome_column, positive_outcome)
-        for i in range(len(resultset[4])):
-            if resultset[4][i] < 0.8:
-                favoured_group_index = resultset[4].index(max(resultset[4])) 
-                favoured_group = resultset[1][favoured_group_index]
-                flash(f"Group {resultset[1][i]} disparately impacted")
-                fairness.apply_di_removal(df, outcome_column, positive_outcome, attribute, favoured_group)
+        resultset = fairness.predicted_outcome_summary(df, attribute, outcome_column, positive_outcome, prediction_column)
         resultsets.append(resultset)
-    return render_template('evaluatepred.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes)
+    return render_template('evaluatepred.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes, prediction_column=prediction_column)
 
 if __name__ == '__main__':
     app.run(debug=True)

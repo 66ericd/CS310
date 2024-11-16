@@ -84,11 +84,15 @@
                 </div>
 
                 <div class="row mt-3" id="dropdownsPredictions" style="display: none;">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label for="outcomeColumnPredictions">Select Outcome Column:</label>
                         <select class="form-control" id="outcomeColumnPredictions"></select>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-4">
+                        <label for="predictionsColumnPredictions">Select Predictions Column:</label>
+                        <select class="form-control" id="predictionsColumnPredictions"></select>
+                    </div>
+                    <div class="col-md-4">
                         <label for="positiveOutcomePredictions">Select Positive Outcome Value:</label>
                         <select class="form-control" id="positiveOutcomePredictions"></select>
                     </div>
@@ -152,6 +156,7 @@
                         } else if (currentTab === 'predictions-tab') {
                             $('#sensitiveAttributesPredictions').html(checkboxes);
                             $('#outcomeColumnPredictions').html(columnOptions);
+                            $('#predictionsColumnPredictions').html(columnOptions);
                         }
 
                         $('#outcomeColumnCsv, #outcomeColumnPredictions').on('change', function() {
@@ -235,11 +240,16 @@
 
                 var outcomeColumn = (type === 'csv') ? $('#outcomeColumnCsv').val() : $('#outcomeColumnPredictions').val();
                 var positiveOutcome = (type === 'csv') ? $('#positiveOutcomeCsv').val() : $('#positiveOutcomePredictions').val();
+                var predictionsColumn = (type === 'predictions') ? $('#predictionsColumnPredictions').val() : '';
 
                 var form = $('<form action="' + (type === 'csv' ? '/evaluate' : '/evaluatepred') + '" method="POST">')
                     .append('<input type="hidden" name="sensitiveAttributes" value="' + selectedAttributes.join(',') + '">')
                     .append('<input type="hidden" name="outcomeColumn" value="' + outcomeColumn + '">')
                     .append('<input type="hidden" name="positiveOutcome" value="' + positiveOutcome + '">');
+
+                if (type === 'predictions') {
+                    form.append('<input type="hidden" name="predictionsColumn" value="' + predictionsColumn + '">');
+                }
 
                 $('body').append(form);
                 form.submit();

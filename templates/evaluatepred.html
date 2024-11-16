@@ -15,41 +15,37 @@
     </nav>
     <div class="container mt-5">
         <h1>Evaluation Results (Predictions)</h1>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="alert alert-dark" role="alert">
-          <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-        {% endwith %}
+        
         {% for resultset in resultsets %}
-          <div class="mb-4">
-            <h2>{{ resultset[0] }}</h2>
-            <ul class="nav nav-tabs" id="tabSet{{ loop.index }}" role="tablist">
+          <div class="mb-5">
+            <h2>{{ resultset[0] }} - Prediction Analysis</h2>
+
+            <!-- Tabs for FPR, FNR, and PA -->
+            <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="positive-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#positive{{ loop.index }}" type="button" role="tab" aria-controls="positive{{ loop.index }}" aria-selected="true">Positive Outcomes</button>
+                <button class="nav-link active" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="true">False Positive Rate</button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="negative-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#negative{{ loop.index }}" type="button" role="tab" aria-controls="negative{{ loop.index }}" aria-selected="false">Negative Outcomes</button>
+                <button class="nav-link" id="fnr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fnr{{ loop.index }}" type="button" role="tab" aria-controls="fnr{{ loop.index }}" aria-selected="false">False Negative Rate</button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="disparate-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#disparate{{ loop.index }}" type="button" role="tab" aria-controls="disparate{{ loop.index }}" aria-selected="false">Disparate Impact Ratio</button>
+                <button class="nav-link" id="pa-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pa{{ loop.index }}" type="button" role="tab" aria-controls="pa{{ loop.index }}" aria-selected="false">Prediction Accuracy</button>
               </li>
             </ul>
 
-            <div class="tab-content mt-3" id="tabContent{{ loop.index }}">
-              <div class="tab-pane fade show active" id="positive{{ loop.index }}" role="tabpanel" aria-labelledby="positive-tab-{{ loop.index }}">
-                <canvas id="positiveImpactChart{{ loop.index }}" width="400" height="200"></canvas>
+            <!-- Tab Content -->
+            <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
+              <!-- FPR Chart -->
+              <div class="tab-pane fade show active" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
+                <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
-              <div class="tab-pane fade" id="negative{{ loop.index }}" role="tabpanel" aria-labelledby="negative-tab-{{ loop.index }}">
-                <canvas id="negativeImpactChart{{ loop.index }}" width="400" height="200"></canvas>
+              <!-- FNR Chart -->
+              <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
+                <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
-              <div class="tab-pane fade" id="disparate{{ loop.index }}" role="tabpanel" aria-labelledby="disparate-tab-{{ loop.index }}">
-                <canvas id="disparateImpactChart{{ loop.index }}" width="400" height="200"></canvas>
+              <!-- PA Chart -->
+              <div class="tab-pane fade" id="pa{{ loop.index }}" role="tabpanel" aria-labelledby="pa-tab-{{ loop.index }}">
+                <canvas id="paChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
             </div>
           </div>
@@ -61,61 +57,64 @@
       document.addEventListener('DOMContentLoaded', function() {
         {% for resultset in resultsets %}
           const labels{{ loop.index }} = {{ resultset[1] | tojson }};
-          const positiveData{{ loop.index }} = {{ resultset[2] | tojson }};
-          const negativeData{{ loop.index }} = {{ resultset[3] | tojson }};
-          const disparateData{{ loop.index }} = {{ resultset[4] | tojson }};
+          const fprData{{ loop.index }} = {{ resultset[2] | tojson }};
+          const fnrData{{ loop.index }} = {{ resultset[3] | tojson }};
+          const paData{{ loop.index }} = {{ resultset[4] | tojson }};
           
-          new Chart(document.getElementById('positiveImpactChart{{ loop.index }}').getContext('2d'), {
+          // FPR Chart
+          new Chart(document.getElementById('fprChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
             data: {
               labels: labels{{ loop.index }},
               datasets: [{
-                label: 'Positive Outcomes (%)',
-                data: positiveData{{ loop.index }},
+                label: 'False Positive Rates (FPR)',
+                data: fprData{{ loop.index }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+          // FNR Chart
+          new Chart(document.getElementById('fnrChart{{ loop.index }}').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labels{{ loop.index }},
+              datasets: [{
+                label: 'False Negative Rates (FNR)',
+                data: fnrData{{ loop.index }},
+                backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+          // PA Chart
+          new Chart(document.getElementById('paChart{{ loop.index }}').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labels{{ loop.index }},
+              datasets: [{
+                label: 'Prediction Accuracy (PA)',
+                data: paData{{ loop.index }},
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-              }]
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
-          });
-
-          new Chart(document.getElementById('negativeImpactChart{{ loop.index }}').getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: labels{{ loop.index }},
-              datasets: [{
-                label: 'Negative Outcomes (%)',
-                data: negativeData{{ loop.index }},
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-              }]
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
-          });
-
-          new Chart(document.getElementById('disparateImpactChart{{ loop.index }}').getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: labels{{ loop.index }},
-              datasets: [{
-                label: 'Disparate Impact',
-                data: disparateData{{ loop.index }},
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 1
               }]
             },

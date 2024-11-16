@@ -24,21 +24,19 @@ def biased_hiring_predictions():
     for i in range(500):  
         score = random.randint(0, 1000) 
         gender = random.choice(["Male", "Female"]) 
-        prob = score / 1000
-
+        prob = score / 1000 
         if gender == "Male":
-            prediction_prob = score / 1000
-        if gender == "Female":
-            prediction_prob = score / 4000
-    
+            prediction_prob = score / 1000 * 2  
+        elif gender == "Female":
+            prediction_prob = score / 1000 * 0.5 
         rn = random.random()
-        accepted = 1 if prob > rn else 0
-        predicted_accepted = 1 if prediction_prob > rn else 0
+        accepted = 1 if prob > rn else 0  
+        predicted_accepted = 1 if prediction_prob > rn else 0  
         data.append([score, gender, accepted, predicted_accepted])
 
     with open("biased_hiring_predictions.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["Score", "Gender", "Accepted", "Predicted"])
-        writer.writerows(data)  
+        writer.writerows(data)
 
 biased_hiring_predictions()
