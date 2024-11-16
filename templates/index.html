@@ -18,7 +18,7 @@
             align-items: center; 
         }
     </style>
-</head>
+  </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
         <div class="container-fluid">
@@ -26,55 +26,113 @@
         </div>
     </nav>
     <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6">
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="uploadTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="csv-tab" data-bs-toggle="tab" href="#csv" role="tab" aria-controls="csv" aria-selected="true">Upload CSV Dataset</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="predictions-tab" data-bs-toggle="tab" href="#predictions" role="tab" aria-controls="predictions" aria-selected="false">Upload CSV with Predictions</a>
+            </li>
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content mt-3" id="uploadTabsContent">
+            <!-- Tab 1: CSV Dataset Upload -->
+            <div class="tab-pane fade show active" id="csv" role="tabpanel" aria-labelledby="csv-tab">
                 <h1>Upload a CSV File</h1>
-                <input type="file" id="fileInput" accept=".csv" class="form-control-file">
+                <input type="file" id="csvFileInput" accept=".csv" class="form-control-file">
+
+                <!-- Sensitive Attributes and Outcome selection for CSV Dataset -->
+                <div class="row mt-3" id="sensitiveAttributesContainerCsv" style="display: none;">
+                    <div class="col-md-6">
+                        <h2>Select Sensitive Attributes</h2>
+                        <div id="sensitiveAttributesCsv" class="checkbox-container"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="dropdownsCsv" style="display: none;">
+                    <div class="col-md-5">
+                        <label for="outcomeColumnCsv">Select Outcome Column:</label>
+                        <select class="form-control" id="outcomeColumnCsv"></select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="positiveOutcomeCsv">Select Positive Outcome Value:</label>
+                        <select class="form-control" id="positiveOutcomeCsv"></select>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="evaluateButtonContainerCsv" style="display: none;">
+                    <button class="btn btn-primary" id="evaluateButtonCsv">Evaluate</button>
+                </div>
+
+                <h2 class="mt-5" id="dataPreviewHeadingCsv" style="display: none;">Data Preview (First 5 Rows)</h2>
+                <div class="table-responsive" id="dataTableCsv"></div>
             </div>
-            <div class="col-md-6" id="sensitiveAttributesContainer" style="display: none;">
-                <h2>Select Sensitive Attributes</h2>
-                <div id="sensitiveAttributes" class="checkbox-container"></div>
+
+            <!-- Tab 2: CSV with Predictions Upload -->
+            <div class="tab-pane fade" id="predictions" role="tabpanel" aria-labelledby="predictions-tab">
+                <h1>Upload CSV with Predictions</h1>
+                <input type="file" id="predictionsFileInput" accept=".csv" class="form-control-file">
+
+                <!-- Sensitive Attributes and Outcome selection for Predictions -->
+                <div class="row mt-3" id="sensitiveAttributesContainerPredictions" style="display: none;">
+                    <div class="col-md-6">
+                        <h2>Select Sensitive Attributes</h2>
+                        <div id="sensitiveAttributesPredictions" class="checkbox-container"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="dropdownsPredictions" style="display: none;">
+                    <div class="col-md-5">
+                        <label for="outcomeColumnPredictions">Select Outcome Column:</label>
+                        <select class="form-control" id="outcomeColumnPredictions"></select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="positiveOutcomePredictions">Select Positive Outcome Value:</label>
+                        <select class="form-control" id="positiveOutcomePredictions"></select>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="evaluateButtonContainerPredictions" style="display: none;">
+                    <button class="btn btn-primary" id="evaluateButtonPredictions">Evaluate</button>
+                </div>
+
+                <h2 class="mt-5" id="dataPreviewHeadingPredictions" style="display: none;">Data Preview (First 5 Rows)</h2>
+                <div class="table-responsive" id="dataTablePredictions"></div>
             </div>
         </div>
-
-        <div class="row mt-3" id="dropdowns" style="display: none;">
-            <div class="col-md-5">
-                <label for="outcomeColumn">Select Outcome Column:</label>
-                <select class="form-control" id="outcomeColumn"></select>
-            </div>
-            <div class="col-md-5">
-                <label for="positiveOutcome">Select Positive Outcome Value:</label>
-                <select class="form-control" id="positiveOutcome"></select>
-            </div>
-        </div>
-
-        <div class="row mt-3" id="evaluateButtonContainer" style="display: none;">
-            <button class="btn btn-primary" id="evaluateButton">Evaluate</button>
-        </div>
-
-        <h2 class="mt-5" id="dataPreviewHeading" style="display: none;">Data Preview (First 5 Rows)</h2>
-        <div class="table-responsive" id="dataTable"></div>
     </div>
 
     <script>
         $(document).ready(function() {
-            $('#fileInput').on('change', function() {
+            // Handle file input change for both tabs
+            $('#csvFileInput, #predictionsFileInput').on('change', function() {
                 var file = this.files[0];
                 var formData = new FormData();
                 formData.append('file', file);
 
                 $.ajax({
-                    url: '/upload',
+                    url: '/upload',  // Update with the appropriate server endpoint
                     type: 'POST',
                     data: formData,
                     contentType: false,
                     processData: false,
                     success: function(response) {
-                        $('#dataTable').html(response.table);
-                        $('#dataPreviewHeading').show();
-                        $('#sensitiveAttributesContainer').show();
-                        $('#dropdowns').show();
-                        $('#evaluateButtonContainer').show();
+                        var currentTab = $('#uploadTabs .nav-link.active').attr('id');  // Get current tab id
+                        if (currentTab === 'csv-tab') {
+                            $('#dataTableCsv').html(response.table);
+                            $('#dataPreviewHeadingCsv').show();
+                            $('#sensitiveAttributesContainerCsv').show();
+                            $('#dropdownsCsv').show();
+                            $('#evaluateButtonContainerCsv').show();
+                        } else if (currentTab === 'predictions-tab') {
+                            $('#dataTablePredictions').html(response.table);
+                            $('#dataPreviewHeadingPredictions').show();
+                            $('#sensitiveAttributesContainerPredictions').show();
+                            $('#dropdownsPredictions').show();
+                            $('#evaluateButtonContainerPredictions').show();
+                        }
 
                         var checkboxes = '';
                         var columnOptions = '<option value="">Select a column</option>';
@@ -87,16 +145,21 @@
                             
                             columnOptions += '<option value="' + column + '">' + column + '</option>';
                         });
-                        
-                        $('#sensitiveAttributes').html(checkboxes);
-                        $('#outcomeColumn').html(columnOptions);
 
-                        $('#outcomeColumn').on('change', function() {
+                        if (currentTab === 'csv-tab') {
+                            $('#sensitiveAttributesCsv').html(checkboxes);
+                            $('#outcomeColumnCsv').html(columnOptions);
+                        } else if (currentTab === 'predictions-tab') {
+                            $('#sensitiveAttributesPredictions').html(checkboxes);
+                            $('#outcomeColumnPredictions').html(columnOptions);
+                        }
+
+                        $('#outcomeColumnCsv, #outcomeColumnPredictions').on('change', function() {
                             var selectedColumn = $(this).val();
                             if (selectedColumn) {
-                                updatePositiveOutcomeDropdown(selectedColumn);
+                                updatePositiveOutcomeDropdown(selectedColumn, currentTab);
                             } else {
-                                $('#positiveOutcome').html('<option value="">Select a value</option>');
+                                $('#positiveOutcomeCsv, #positiveOutcomePredictions').html('<option value="">Select a value</option>');
                             }
                         });
 
@@ -130,7 +193,7 @@
                 });
             }
 
-            function updatePositiveOutcomeDropdown(selectedColumn) {
+            function updatePositiveOutcomeDropdown(selectedColumn, currentTab) {
                 $.ajax({
                     url: '/column-values',
                     type: 'POST',
@@ -141,7 +204,12 @@
                         response.values.forEach(function(value) {
                             options += '<option value="' + value + '">' + value + '</option>';
                         });
-                        $('#positiveOutcome').html(options);
+
+                        if (currentTab === 'csv-tab') {
+                            $('#positiveOutcomeCsv').html(options);
+                        } else if (currentTab === 'predictions-tab') {
+                            $('#positiveOutcomePredictions').html(options);
+                        }
                     },
                     error: function() {
                         alert('Error retrieving column values');
@@ -149,23 +217,33 @@
                 });
             }
 
-            $('#evaluateButton').on('click', function() {
+            // Modify the evaluate button handlers
+            $('#evaluateButtonCsv').on('click', function() {
+                evaluateForm('csv');
+            });
+
+            $('#evaluateButtonPredictions').on('click', function() {
+                evaluateForm('predictions');
+            });
+
+            // Modify the evaluateForm function to route to different URLs
+            function evaluateForm(type) {
                 var selectedAttributes = [];
                 $('input[type="checkbox"]:checked').each(function() {
                     selectedAttributes.push($(this).val());
                 });
 
-                var outcomeColumn = $('#outcomeColumn').val();
-                var positiveOutcome = $('#positiveOutcome').val();
+                var outcomeColumn = (type === 'csv') ? $('#outcomeColumnCsv').val() : $('#outcomeColumnPredictions').val();
+                var positiveOutcome = (type === 'csv') ? $('#positiveOutcomeCsv').val() : $('#positiveOutcomePredictions').val();
 
-                var form = $('<form action="/evaluate" method="POST">')
+                var form = $('<form action="' + (type === 'csv' ? '/evaluate' : '/evaluatepred') + '" method="POST">')
                     .append('<input type="hidden" name="sensitiveAttributes" value="' + selectedAttributes.join(',') + '">')
                     .append('<input type="hidden" name="outcomeColumn" value="' + outcomeColumn + '">')
                     .append('<input type="hidden" name="positiveOutcome" value="' + positiveOutcome + '">');
 
                 $('body').append(form);
                 form.submit();
-            });
+            }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
