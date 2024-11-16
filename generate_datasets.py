@@ -39,4 +39,4 @@ def biased_hiring_predictions():
         writer.writerow(["Score", "Gender", "Accepted", "Predicted"])
         writer.writerows(data)
 
-biased_hiring_predictions()
+biased_hiring()

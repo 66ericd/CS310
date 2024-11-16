@@ -20,7 +20,6 @@
           <div class="mb-5">
             <h2>{{ resultset[0] }} - Prediction Analysis</h2>
 
-            <!-- Tabs for FPR, FNR, and PA -->
             <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="true">False Positive Rate</button>
@@ -33,17 +32,13 @@
               </li>
             </ul>
 
-            <!-- Tab Content -->
             <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
-              <!-- FPR Chart -->
               <div class="tab-pane fade show active" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
                 <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
-              <!-- FNR Chart -->
               <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
                 <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
-              <!-- PA Chart -->
               <div class="tab-pane fade" id="pa{{ loop.index }}" role="tabpanel" aria-labelledby="pa-tab-{{ loop.index }}">
                 <canvas id="paChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
@@ -61,7 +56,6 @@
           const fnrData{{ loop.index }} = {{ resultset[3] | tojson }};
           const paData{{ loop.index }} = {{ resultset[4] | tojson }};
           
-          // FPR Chart
           new Chart(document.getElementById('fprChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
             data: {
@@ -83,7 +77,6 @@
             }
           });
 
-          // FNR Chart
           new Chart(document.getElementById('fnrChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
             data: {
@@ -105,7 +98,6 @@
             }
           });
 
-          // PA Chart
           new Chart(document.getElementById('paChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
             data: {

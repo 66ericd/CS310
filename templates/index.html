@@ -26,7 +26,6 @@
         </div>
     </nav>
     <div class="container mt-5">
-        <!-- Tab navigation -->
         <ul class="nav nav-tabs" id="uploadTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="csv-tab" data-bs-toggle="tab" href="#csv" role="tab" aria-controls="csv" aria-selected="true">Upload CSV Dataset</a>
@@ -36,14 +35,11 @@
             </li>
         </ul>
 
-        <!-- Tab content -->
         <div class="tab-content mt-3" id="uploadTabsContent">
-            <!-- Tab 1: CSV Dataset Upload -->
             <div class="tab-pane fade show active" id="csv" role="tabpanel" aria-labelledby="csv-tab">
                 <h1>Upload a CSV File</h1>
                 <input type="file" id="csvFileInput" accept=".csv" class="form-control-file">
 
-                <!-- Sensitive Attributes and Outcome selection for CSV Dataset -->
                 <div class="row mt-3" id="sensitiveAttributesContainerCsv" style="display: none;">
                     <div class="col-md-6">
                         <h2>Select Sensitive Attributes</h2>
@@ -70,12 +66,10 @@
                 <div class="table-responsive" id="dataTableCsv"></div>
             </div>
 
-            <!-- Tab 2: CSV with Predictions Upload -->
             <div class="tab-pane fade" id="predictions" role="tabpanel" aria-labelledby="predictions-tab">
                 <h1>Upload CSV with Predictions</h1>
                 <input type="file" id="predictionsFileInput" accept=".csv" class="form-control-file">
 
-                <!-- Sensitive Attributes and Outcome selection for Predictions -->
                 <div class="row mt-3" id="sensitiveAttributesContainerPredictions" style="display: none;">
                     <div class="col-md-6">
                         <h2>Select Sensitive Attributes</h2>
@@ -110,20 +104,19 @@
 
     <script>
         $(document).ready(function() {
-            // Handle file input change for both tabs
             $('#csvFileInput, #predictionsFileInput').on('change', function() {
                 var file = this.files[0];
                 var formData = new FormData();
                 formData.append('file', file);
 
                 $.ajax({
-                    url: '/upload',  // Update with the appropriate server endpoint
+                    url: '/upload',  
                     type: 'POST',
                     data: formData,
                     contentType: false,
                     processData: false,
                     success: function(response) {
-                        var currentTab = $('#uploadTabs .nav-link.active').attr('id');  // Get current tab id
+                        var currentTab = $('#uploadTabs .nav-link.active').attr('id'); 
                         if (currentTab === 'csv-tab') {
                             $('#dataTableCsv').html(response.table);
                             $('#dataPreviewHeadingCsv').show();
@@ -222,7 +215,6 @@
                 });
             }
 
-            // Modify the evaluate button handlers
             $('#evaluateButtonCsv').on('click', function() {
                 evaluateForm('csv');
             });
@@ -231,7 +223,6 @@
                 evaluateForm('predictions');
             });
 
-            // Modify the evaluateForm function to route to different URLs
             function evaluateForm(type) {
                 var selectedAttributes = [];
                 $('input[type="checkbox"]:checked').each(function() {
