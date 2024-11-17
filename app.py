@@ -80,9 +80,11 @@ def disparate_impact():
     original_file_path = session.get('uploaded_csv_file_path') 
     original_df = pd.read_csv(original_file_path)
     original_head = original_df.head().to_html(classes="table table-striped", index=False)
+    original_head = original_head.replace('<thead>', '<thead><style>th { text-align: left; }</style>')
     transformed_file_path = session.get('transformed_file')    
     transformed_df = pd.read_csv(transformed_file_path)
     transformed_head = transformed_df.head().to_html(classes="table table-striped", index=False)
+    transformed_head = transformed_head.replace('<thead>', '<thead><style>th { text-align: left; }</style>')
     return render_template('disparate_impact.html', original_head=original_head, transformed_head=transformed_head)
 
 @app.route('/download-file')
