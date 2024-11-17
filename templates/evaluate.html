@@ -9,26 +9,23 @@
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-        <div class="container-fluid">
-          <span class="navbar-brand mb-0 h1">CS310 Project</span>
-        </div>
-    </nav>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">CS310 Project</a>
+      </div>
+  </nav>
     <div class="container mt-5">
         <h1>Evaluation Results</h1>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="alert alert-dark" role="alert">
-          <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-        {% endwith %}
         {% for resultset in resultsets %}
-          <div class="mb-4">
+          <div class="mb-4 border p-3 rounded">
             <h2>{{ resultset[0] }}</h2>
+            <div class="alert alert-light" role="alert">
+              <form action="{{ url_for('removedisparate') }}" method="POST" class="m-0">
+                <input type="hidden" name="attribute" value="{{ resultset[0] }}">
+                <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
+                <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
+                <button type="submit" class="btn btn-primary">Apply Disparate Impact Removal</button>
+              </form>
+            </div>
             <ul class="nav nav-tabs" id="tabSet{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="positive-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#positive{{ loop.index }}" type="button" role="tab" aria-controls="positive{{ loop.index }}" aria-selected="true">Positive Outcomes</button>

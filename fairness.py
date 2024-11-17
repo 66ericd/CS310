@@ -44,16 +44,13 @@ def predicted_outcome_summary(df, sensitive_attr, outcome, positive_value, predi
 
 
 
-def apply_di_removal(df, outcome, positive_value, sensitive_attr, favoured_group):
+def apply_di_removal(df, outcome, positive_value, sensitive_attr):
     categorical_columns = df.select_dtypes(include=["object", "category"]).columns.tolist()
     encoding_maps = {}
     for column in categorical_columns:
         df[column] = pd.Categorical(df[column])
         encoding_maps[column] = dict(enumerate(df[column].cat.categories))
         df[column] = df[column].cat.codes
-    for column, mapping in encoding_maps[sensitive_attr].items():
-        if mapping == favoured_group:
-            favoured_group_encoded = column
     dataset = BinaryLabelDataset(
         favorable_label=1,
         unfavorable_label=0,

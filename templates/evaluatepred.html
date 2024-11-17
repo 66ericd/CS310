@@ -10,7 +10,7 @@
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
         <div class="container-fluid">
-          <span class="navbar-brand mb-0 h1">CS310 Project</span>
+          <a class="navbar-brand" href="/">CS310 Project</a>
         </div>
     </nav>
     <div class="container mt-5">
@@ -34,9 +34,15 @@
 
             <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
               <div class="tab-pane fade show active" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
+                <div class="alert alert-light" role="alert">
+                    A difference of <strong>{{ (resultset[2] | max) - (resultset[2] | min) }}%</strong> was found across false positive rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FPRs and FNRs.
+                </div>
                 <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
               <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
+                <div class="alert alert-light" role="alert">
+                    A difference of <strong>{{ (resultset[3] | max) - (resultset[3] | min) }}%</strong> was found across false negative rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FNRs and FPRs.
+                </div>                
                 <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
               <div class="tab-pane fade" id="pa{{ loop.index }}" role="tabpanel" aria-labelledby="pa-tab-{{ loop.index }}">
@@ -61,7 +67,7 @@
             data: {
               labels: labels{{ loop.index }},
               datasets: [{
-                label: 'False Positive Rates (FPR)',
+                label: 'False Positive Rate (%)',
                 data: fprData{{ loop.index }},
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -82,10 +88,10 @@
             data: {
               labels: labels{{ loop.index }},
               datasets: [{
-                label: 'False Negative Rates (FNR)',
+                label: 'False Negative Rate (%)',
                 data: fnrData{{ loop.index }},
-                backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                borderColor: 'rgba(255, 206, 86, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
               }]
             },
@@ -103,10 +109,10 @@
             data: {
               labels: labels{{ loop.index }},
               datasets: [{
-                label: 'Prediction Accuracy (PA)',
+                label: 'Prediction Accuracy (%)',
                 data: paData{{ loop.index }},
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
               }]
             },

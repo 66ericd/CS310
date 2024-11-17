@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, jsonify, session, flash
+from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
 import pandas as pd
-import io
 import os
 import fairness
 
@@ -30,7 +29,6 @@ def upload_file():
     columns = df.columns.tolist()
 
     return jsonify({'table': table, 'columns': columns})
-
 
 @app.route('/sensitive-attributes', methods=['POST'])
 def sensitive_attributes():
@@ -63,30 +61,34 @@ def evaluate():
     positive_outcome = request.form.get('positiveOutcome')
     for attribute in sensitive_attributes.split(","):
         resultset = fairness.outcome_summary(df, attribute, outcome_column, positive_outcome)
-        for i in range(len(resultset[4])):
-            if resultset[4][i] < 0.8:
-                favoured_group_index = resultset[4].index(max(resultset[4])) 
-                favoured_group = resultset[1][favoured_group_index]
-                flash(f"Group {resultset[1][i]} disparately impacted")
-                fairness.apply_di_removal(df, outcome_column, positive_outcome, attribute, favoured_group)
         resultsets.append(resultset)
     return render_template('evaluate.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes)
 
-@app.route('/evaluatepred', methods=['POST'])
-def evaluatepred():
-    resultsets = []
+@app.route('/removedisparate', methods=['POST'])
+def removedisparate():
     file_path = session.get('uploaded_csv_file_path')
-    if not file_path or not os.path.exists(file_path):
-        return "Error: No CSV file uploaded or file not found.", 400
     df = pd.read_csv(file_path)
-    sensitive_attributes = request.form.get('sensitiveAttributes')
+    sensitive_attribute = request.form.get('attribute')
     outcome_column = request.form.get('outcomeColumn')
     positive_outcome = request.form.get('positiveOutcome')
-    prediction_column = request.form.get('predictionsColumn')
-    for attribute in sensitive_attributes.split(","):
-        resultset = fairness.predicted_outcome_summary(df, attribute, outcome_column, positive_outcome, prediction_column)
-        resultsets.append(resultset)
-    return render_template('evaluatepred.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes, prediction_column=prediction_column)
+    fairness.apply_di_removal(df, outcome_column, positive_outcome, sensitive_attribute)
+    session['transformed_file'] = "transformed_output.csv"
+    return redirect(url_for('disparate_impact'))
+
+@app.route('/disparate-impact')
+def disparate_impact():
+    original_file_path = session.get('uploaded_csv_file_path') 
+    original_df = pd.read_csv(original_file_path)
+    original_head = original_df.head().to_html(classes="table table-striped", index=False)
+    transformed_file_path = session.get('transformed_file')    
+    transformed_df = pd.read_csv(transformed_file_path)
+    transformed_head = transformed_df.head().to_html(classes="table table-striped", index=False)
+    return render_template('disparate_impact.html', original_head=original_head, transformed_head=transformed_head)
+
+@app.route('/download-file')
+def download_file():
+    output_file = session.get('transformed_file')
+    return send_file(output_file, as_attachment=True, download_name="transformed_output.csv", mimetype="text/csv")
 
 if __name__ == '__main__':
     app.run(debug=True)

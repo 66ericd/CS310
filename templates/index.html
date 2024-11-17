@@ -22,22 +22,22 @@
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
         <div class="container-fluid">
-          <span class="navbar-brand mb-0 h1">CS310 Project</span>
+          <a class="navbar-brand" href="/">CS310 Project</a>
         </div>
     </nav>
     <div class="container mt-5">
         <ul class="nav nav-tabs" id="uploadTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="csv-tab" data-bs-toggle="tab" href="#csv" role="tab" aria-controls="csv" aria-selected="true">Upload CSV Dataset</a>
+                <a class="nav-link active" id="csv-tab" data-bs-toggle="tab" href="#csv" role="tab" aria-controls="csv" aria-selected="true">Upload Dataset</a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="predictions-tab" data-bs-toggle="tab" href="#predictions" role="tab" aria-controls="predictions" aria-selected="false">Upload CSV with Predictions</a>
+                <a class="nav-link" id="predictions-tab" data-bs-toggle="tab" href="#predictions" role="tab" aria-controls="predictions" aria-selected="false">Upload Dataset with Predictions</a>
             </li>
         </ul>
 
         <div class="tab-content mt-3" id="uploadTabsContent">
             <div class="tab-pane fade show active" id="csv" role="tabpanel" aria-labelledby="csv-tab">
-                <h1>Upload a CSV File</h1>
+                <h1>Upload Dataset (CSV)</h1>
                 <input type="file" id="csvFileInput" accept=".csv" class="form-control-file">
 
                 <div class="row mt-3" id="sensitiveAttributesContainerCsv" style="display: none;">
@@ -67,7 +67,7 @@
             </div>
 
             <div class="tab-pane fade" id="predictions" role="tabpanel" aria-labelledby="predictions-tab">
-                <h1>Upload CSV with Predictions</h1>
+                <h1>Upload Dataset with Predictions (CSV)</h1>
                 <input type="file" id="predictionsFileInput" accept=".csv" class="form-control-file">
 
                 <div class="row mt-3" id="sensitiveAttributesContainerPredictions" style="display: none;">
