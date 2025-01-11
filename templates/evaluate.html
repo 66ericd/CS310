@@ -19,13 +19,20 @@
           <div class="mb-4 border p-3 rounded">
             <h2>{{ resultset[0] }}</h2>
             <div class="alert alert-light" role="alert">
+              <div class="d-flex justify-content-start mt-2">
               <form action="{{ url_for('removedisparate') }}" method="POST" class="m-0">
                 <input type="hidden" name="attribute" value="{{ resultset[0] }}">
                 <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
                 <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
-                <button type="submit" class="btn btn-primary">Apply Disparate Impact Removal</button>
+                <button type="submit" class="btn btn-primary me-2">Apply Disparate Impact Removal</button>
               </form>
-            </div>
+                <form action="{{ url_for('resampling') }}" method="POST" class="m-0">
+                  <input type="hidden" name="attribute" value="{{ resultset[0] }}">
+                  <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
+                  <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
+                  <button type="submit" class="btn btn-primary">Apply Resampling</button>
+                </div>
+                </form>
             <ul class="nav nav-tabs" id="tabSet{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="positive-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#positive{{ loop.index }}" type="button" role="tab" aria-controls="positive{{ loop.index }}" aria-selected="true">Positive Outcomes</button>

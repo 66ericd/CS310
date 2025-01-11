@@ -140,5 +140,34 @@ def download_file():
     output_file = session.get('transformed_file')
     return send_file(output_file, as_attachment=True, download_name="transformed_output.csv", mimetype="text/csv")
 
+@app.route('/resampling', methods=['POST'])
+def resampling():
+    file_path = session.get('uploaded_csv_file_path')
+    df = pd.read_csv(file_path)
+    sensitive_attribute = request.form.get('attribute')
+    outcome_column = request.form.get('outcomeColumn')
+    positive_outcome = request.form.get('positiveOutcome')
+    fairness.apply_resampling(df, outcome_column, positive_outcome, sensitive_attribute)
+    session['resampled_file'] = "resampled_output.csv"
+    return redirect(url_for('resample', outcome_column=outcome_column, sensitive_attribute=sensitive_attribute, positive_outcome=positive_outcome))
+
+@app.route('/resample')
+def resample():
+    original_file_path = session.get('uploaded_csv_file_path') 
+    original_df = pd.read_csv(original_file_path)
+    resampled_file_path = session.get('resampled_file')    
+    resampled_df = pd.read_csv(resampled_file_path)
+    sensitive_group_column = request.args.get("sensitive_attribute")
+    outcome_column = request.args.get("outcome_column")
+    positive_outcome = request.args.get("positive_outcome")
+    original_results = fairness.outcome_summary(original_df, sensitive_group_column, outcome_column, positive_outcome)
+    resampled_results = fairness.outcome_summary(resampled_df, sensitive_group_column, outcome_column, positive_outcome)
+    return render_template('resample.html', original_results=original_results, resampled_results=resampled_results)
+
+@app.route('/download-file2')
+def download_file2():
+    output_file = session.get('resampled_file')
+    return send_file(output_file, as_attachment=True, download_name="resampled_output.csv", mimetype="text/csv")
+
 if __name__ == '__main__':
     app.run(debug=True)
