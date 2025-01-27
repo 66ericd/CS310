@@ -1,6 +1,7 @@
 import pandas as pd
 from aif360.datasets import BinaryLabelDataset
 from aif360.algorithms.preprocessing import DisparateImpactRemover
+import random
 
 def outcome_summary(df, sensitive_attr, outcome, positive_value):
     summary = df.groupby(sensitive_attr)[outcome].value_counts().unstack(fill_value=0)
@@ -91,8 +92,52 @@ def apply_resampling(df, outcome, positive_value, sensitive_attr):
             elif expected_sizes[(group, subgroup)] < len(resampled_subgroups[(group, subgroup)]):
                 for i in range(len(resampled_subgroups[(group, subgroup)]) - expected_sizes[(group, subgroup)]):
                     resampled_subgroups[(group, subgroup)].drop(resampled_subgroups[(group, subgroup)].sample(n=1).index, inplace=True)
-
-            transformed_df = pd.concat([transformed_df, resampled_subgroups[(group, subgroup)]], ignore_index=True)
-   
-    print(expected_sizes)
+            transformed_df = pd.concat([transformed_df, resampled_subgroups[(group, subgroup)]], ignore_index=True)  
     transformed_df.to_csv("resampled_output.csv", index=False)
+
+def apply_postprocessing(df, outcome, predictions, positive_value, sensitive_attr, alpha):
+    df = df.astype(str)    
+    outcome_values = df[outcome].unique()
+    negative_value = [x for x in outcome_values if x != positive_value][0]
+    overall_positive_rate = (df[predictions] == positive_value).mean()
+    groups = df[sensitive_attr].unique()
+    adjusted_predictions = df[predictions].copy() 
+    for group in groups:
+        group_df = df[df[sensitive_attr] == group]
+        actual_positive_rate = (group_df[predictions] == positive_value).mean()
+        target_positive_rate = alpha * overall_positive_rate + (1 - alpha) * (
+            (group_df[outcome] == positive_value).mean()
+        )
+        if actual_positive_rate < target_positive_rate:
+            false_negatives = group_df[
+                (group_df[outcome] == positive_value) & (group_df[predictions] != positive_value)
+            ]
+            candidates = false_negatives.index.tolist()
+        elif actual_positive_rate > target_positive_rate:
+            false_positives = group_df[
+                (group_df[outcome] != positive_value) & (group_df[predictions] == positive_value)
+            ]
+            candidates = false_positives.index.tolist()
+        else:
+            continue
+        flips_needed = int(
+            abs(len(group_df) * target_positive_rate - len(group_df) * actual_positive_rate)
+        )
+        while flips_needed > 0 and candidates:
+            idx = random.choice(candidates)
+            candidates.remove(idx)
+            adjusted_predictions[idx] = (
+                positive_value if actual_positive_rate < target_positive_rate else negative_value
+            )
+            flips_needed -= 1
+        if flips_needed > 0:
+            true_candidates = group_df.index.difference(candidates).tolist()
+            while flips_needed > 0 and true_candidates:
+                idx = random.choice(true_candidates)
+                true_candidates.remove(idx)
+                adjusted_predictions[idx] = (
+                    positive_value if actual_positive_rate < target_positive_rate else negative_value
+                )
+                flips_needed -= 1
+    df[predictions] = adjusted_predictions
+    df.to_csv("adjusted_predictions.csv", index=False)

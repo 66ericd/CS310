@@ -169,5 +169,18 @@ def download_file2():
     output_file = session.get('resampled_file')
     return send_file(output_file, as_attachment=True, download_name="resampled_output.csv", mimetype="text/csv")
 
+@app.route('/postprocessing', methods=['POST'])
+def postprocessing():
+    file_path = session.get('uploaded_csv_file_path')
+    df = pd.read_csv(file_path)
+    sensitive_attribute = request.form.get('attribute')
+    outcome_column = request.form.get('outcomeColumn')
+    prediction_column = request.form.get('predictionColumn')
+    positive_outcome = request.form.get('positiveOutcome')
+    alpha = float(request.form.get('alphaValue'))
+    fairness.apply_postprocessing_v2(df, outcome_column, prediction_column, positive_outcome, sensitive_attribute, alpha)
+    session['adjusted_file'] = "adjusted_predictions.csv"
+    return render_template("index.html")
+
 if __name__ == '__main__':
     app.run(debug=True)

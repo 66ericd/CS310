@@ -15,11 +15,22 @@
     </nav>
     <div class="container mt-5">
         <h1>Evaluation Results (Predictions)</h1>
-        
         {% for resultset in resultsets %}
-          <div class="mb-5">
+        <div class="mb-4 border p-3 rounded">
             <h2>{{ resultset[0] }} - Prediction Analysis</h2>
-
+            <div class="alert alert-light" role="alert">
+              <div class="d-flex justify-content-start mt-2">
+              <form action="{{ url_for('postprocessing') }}" method="POST" class="m-0">
+                <input type="range" class="form-range" id="alphaRange" min="0" max="1" step="0.1">
+                <input type="text" name="alphaValue" class="form-control mt-3" id="alphaValue" readonly>
+                <input type="hidden" name="attribute" value="{{ resultset[0] }}">
+                <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
+                <input type="hidden" name="predictionColumn" value="{{ prediction_column }}">
+                <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
+                <button type="submit" class="btn btn-primary me-2">Apply Post-Processing</button>
+              </form>
+              </div>
+            </div>
             <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="true">False Positive Rate</button>
@@ -52,7 +63,14 @@
           </div>
         {% endfor %}
     </div>
-
+    <script>
+      const slider = document.getElementById('alphaRange');
+      const sliderValue = document.getElementById('alphaValue');
+      sliderValue.value = slider.value;
+      slider.addEventListener('input', () => {
+          sliderValue.value = slider.value;
+      });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
