@@ -15,25 +15,30 @@
     </nav>
     <div class="container mt-5">
         <h1>Evaluation Results (Predictions)</h1>
-        {% for resultset in resultsets %}
+        {% for attribute in sensitive_attributes %}
         <div class="mb-4 border p-3 rounded">
-            <h2>{{ resultset[0] }} - Prediction Analysis</h2>
-            <div class="alert alert-light" role="alert">
+            <h2>{{ attribute }} - Prediction Analysis</h2>
               <div class="d-flex justify-content-start mt-2">
               <form action="{{ url_for('postprocessing') }}" method="POST" class="m-0">
                 <input type="range" class="form-range" id="alphaRange" min="0" max="1" step="0.1">
                 <input type="text" name="alphaValue" class="form-control mt-3" id="alphaValue" readonly>
-                <input type="hidden" name="attribute" value="{{ resultset[0] }}">
+                <input type="hidden" name="attribute" value="{{ attribute }}">
                 <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
                 <input type="hidden" name="predictionColumn" value="{{ prediction_column }}">
                 <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
                 <button type="submit" class="btn btn-primary me-2">Apply Post-Processing</button>
               </form>
               </div>
-            </div>
+              <br>
             <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="true">False Positive Rate</button>
+                <button class="nav-link active" id="pos-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pos{{ loop.index }}" type="button" role="tab" aria-controls="pos{{ loop.index }}" aria-selected="true">Positive Outcomes</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="neg-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#neg{{ loop.index }}" type="button" role="tab" aria-controls="neg{{ loop.index }}" aria-selected="false">Negative Outcomes</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="false">False Positive Rate</button>
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="fnr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fnr{{ loop.index }}" type="button" role="tab" aria-controls="fnr{{ loop.index }}" aria-selected="false">False Negative Rate</button>
@@ -44,15 +49,21 @@
             </ul>
 
             <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
-              <div class="tab-pane fade show active" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
+              <div class="tab-pane fade show active" id="pos{{ loop.index }}" role="tabpanel" aria-labelledby="pos-tab-{{ loop.index }}">
+                <canvas id="posChart{{ loop.index }}" width="400" height="200"></canvas>
+              </div>
+              <div class="tab-pane fade" id="neg{{ loop.index }}" role="tabpanel" aria-labelledby="neg-tab-{{ loop.index }}">
+                <canvas id="negChart{{ loop.index }}" width="400" height="200"></canvas>
+              </div>
+              <div class="tab-pane fade" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
                 <div class="alert alert-light" role="alert">
-                    A difference of <strong>{{ (resultset[2] | max) - (resultset[2] | min) }}%</strong> was found across false positive rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FPRs and FNRs.
+                    A difference of <strong>{{ ((resultsets[attribute])[1][2] | max) - (resultsets[attribute][1][2] | min) }}%</strong> was found across false positive rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FPRs and FNRs.
                 </div>
                 <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
               <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
                 <div class="alert alert-light" role="alert">
-                    A difference of <strong>{{ (resultset[3] | max) - (resultset[3] | min) }}%</strong> was found across false negative rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FNRs and FPRs.
+                    A difference of <strong>{{ (resultsets[attribute][1][3] | max) - (resultsets[attribute][1][3] | min) }}%</strong> was found across false negative rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FNRs and FPRs.
                 </div>                
                 <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
@@ -74,12 +85,57 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        {% for resultset in resultsets %}
-          const labels{{ loop.index }} = {{ resultset[1] | tojson }};
-          const fprData{{ loop.index }} = {{ resultset[2] | tojson }};
-          const fnrData{{ loop.index }} = {{ resultset[3] | tojson }};
-          const paData{{ loop.index }} = {{ resultset[4] | tojson }};
-          
+        {% for attribute in sensitive_attributes %}
+          const labels{{ loop.index }} = {{ resultsets[attribute][1][1] | tojson }};
+          const labelspred{{ loop.index }} = {{ resultsets[attribute][0][1] | tojson }};
+          const posData{{ loop.index }} = {{ resultsets[attribute][0][2] | tojson }};
+          const negData{{ loop.index }} = {{ resultsets[attribute][0][3] | tojson }};
+          const fprData{{ loop.index }} = {{ resultsets[attribute][1][2] | tojson }};
+          const fnrData{{ loop.index }} = {{ resultsets[attribute][1][3] | tojson }};
+          const paData{{ loop.index }} = {{ resultsets[attribute][1][4] | tojson }};
+ 
+          new Chart(document.getElementById('posChart{{ loop.index }}').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labelspred{{ loop.index }},
+              datasets: [{
+                label: 'Positive Outcomes (%)',
+                data: posData{{ loop.index }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+          new Chart(document.getElementById('negChart{{ loop.index }}').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labelspred{{ loop.index }},
+              datasets: [{
+                label: 'Negative Outcones (%)',
+                data: negData{{ loop.index }},
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });          
+
           new Chart(document.getElementById('fprChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
             data: {

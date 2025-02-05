@@ -29,7 +29,7 @@ Score,Gender,Accepted,Predicted
 673,Male,0,0
 218,Female,0,0
 902,Female,1,1
-475,Male,0,1
+475,Male,0,0
 284,Female,0,0
 114,Female,0,0
 602,Male,1,1
@@ -67,7 +67,7 @@ Score,Gender,Accepted,Predicted
 348,Female,1,1
 509,Female,1,1
 403,Female,1,1
-70,Male,0,0
+70,Male,0,1
 753,Male,0,0
 698,Male,1,1
 76,Male,0,0
@@ -96,7 +96,7 @@ Score,Gender,Accepted,Predicted
 206,Male,0,0
 569,Female,1,1
 419,Male,1,1
-425,Male,0,1
+425,Male,0,0
 872,Female,1,1
 117,Female,0,0
 263,Female,0,0
@@ -196,7 +196,7 @@ Score,Gender,Accepted,Predicted
 766,Female,1,1
 850,Male,1,1
 335,Female,0,0
-630,Male,0,1
+630,Male,0,0
 396,Male,0,0
 447,Male,1,1
 881,Male,1,1
@@ -210,7 +210,7 @@ Score,Gender,Accepted,Predicted
 429,Female,0,0
 333,Male,0,0
 629,Female,0,0
-186,Male,0,1
+186,Male,0,0
 666,Female,1,1
 220,Male,0,0
 907,Female,1,1
@@ -397,10 +397,10 @@ Score,Gender,Accepted,Predicted
 613,Male,1,1
 359,Female,1,1
 66,Female,0,0
-238,Male,0,1
+238,Male,0,0
 145,Male,0,0
 968,Female,1,1
-154,Male,0,0
+154,Male,0,1
 603,Female,1,1
 920,Female,1,1
 341,Male,1,1
@@ -411,7 +411,7 @@ Score,Gender,Accepted,Predicted
 607,Female,1,1
 14,Male,0,0
 349,Female,1,1
-534,Male,0,1
+534,Male,0,0
 789,Female,1,1
 412,Female,1,1
 915,Female,1,1
@@ -493,7 +493,7 @@ Score,Gender,Accepted,Predicted
 167,Male,0,0
 519,Female,1,1
 997,Male,1,1
-147,Male,0,0
+147,Male,0,1
 150,Female,0,0
 593,Female,1,1
 771,Female,1,1

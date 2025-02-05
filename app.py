@@ -67,18 +67,19 @@ def evaluate():
 
 @app.route('/evaluatepred', methods=['POST'])
 def evaluatepred():
-    resultsets = []
+    resultsets = {}
     file_path = session.get('uploaded_csv_file_path')
     if not file_path or not os.path.exists(file_path):
         return "Error: No CSV file uploaded or file not found.", 400
     df = pd.read_csv(file_path)
-    sensitive_attributes = request.form.get('sensitiveAttributes')
+    sensitive_attributes = request.form.get('sensitiveAttributes').split(",")
     outcome_column = request.form.get('outcomeColumn')
     positive_outcome = request.form.get('positiveOutcome')
     prediction_column = request.form.get('predictionsColumn')
-    for attribute in sensitive_attributes.split(","):
-        resultset = fairness.predicted_outcome_summary(df, attribute, outcome_column, positive_outcome, prediction_column)
-        resultsets.append(resultset)
+    for attribute in sensitive_attributes:
+        resultsets[attribute] = []
+        resultsets[attribute].append(fairness.actual_vs_predicted_summary(df, attribute, outcome_column, positive_outcome, prediction_column))
+        resultsets[attribute].append(fairness.predicted_outcome_summary(df, attribute, outcome_column, positive_outcome, prediction_column))
     return render_template('evaluatepred.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes, prediction_column=prediction_column)
 
 
@@ -147,7 +148,7 @@ def resampling():
     sensitive_attribute = request.form.get('attribute')
     outcome_column = request.form.get('outcomeColumn')
     positive_outcome = request.form.get('positiveOutcome')
-    fairness.apply_resampling(df, outcome_column, positive_outcome, sensitive_attribute)
+    fairness.apply_preferential_resampling(df, outcome_column, positive_outcome, sensitive_attribute)
     session['resampled_file'] = "resampled_output.csv"
     return redirect(url_for('resample', outcome_column=outcome_column, sensitive_attribute=sensitive_attribute, positive_outcome=positive_outcome))
 
@@ -178,9 +179,27 @@ def postprocessing():
     prediction_column = request.form.get('predictionColumn')
     positive_outcome = request.form.get('positiveOutcome')
     alpha = float(request.form.get('alphaValue'))
-    fairness.apply_postprocessing_v2(df, outcome_column, prediction_column, positive_outcome, sensitive_attribute, alpha)
+    fairness.apply_postprocessing(df, outcome_column, prediction_column, positive_outcome, sensitive_attribute, alpha)
     session['adjusted_file'] = "adjusted_predictions.csv"
-    return render_template("index.html")
+    return redirect(url_for("postprocess", outcome_column=outcome_column, sensitive_attribute=sensitive_attribute, positive_outcome=positive_outcome, prediction_column=prediction_column))
+
+@app.route('/postprocess')
+def postprocess():
+    original_file_path = session.get('uploaded_csv_file_path')
+    original_df = pd.read_csv(original_file_path)
+    adjusted_file_path = session.get('adjusted_file')
+    adjusted_df = pd.read_csv(adjusted_file_path)
+    sensitive_group_column = request.args.get("sensitive_attribute")
+    outcome_column = request.args.get("outcome_column")
+    positive_outcome = request.args.get("positive_outcome")
+    prediction_column = request.args.get("prediction_column")
+    postprocessing_results = fairness.postprocessing_comparison(original_df, adjusted_df, sensitive_group_column, outcome_column, positive_outcome, prediction_column)
+    return render_template("postprocess.html", postprocessing_results=postprocessing_results)
+
+@app.route('/download-file3')
+def download_file3():
+    output_file = session.get('adjusted_file')
+    return send_file(output_file, as_attachment=True, download_name="adjusted_output.csv", mimetype="text/csv")
 
 if __name__ == '__main__':
     app.run(debug=True)
