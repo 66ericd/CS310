@@ -6,18 +6,28 @@
     <title>Evaluation Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">CS310 Project</a>
+        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;AI Fairness Toolkit</a>
       </div>
-  </nav>
+    </nav>
     <div class="container mt-5">
         <h1>Evaluation Results</h1>
+        <br>
         {% for resultset in resultsets %}
           <div class="mb-4 border p-3 rounded">
             <h2>{{ resultset[0] }} - Outcome Analysis</h2>
+            <br>
+            <div class="alert alert-primary" role="alert">
+              <ul>
+              {% for message in resultset[6] %}
+               • {{ message | safe}}<br>
+              {% endfor %}
+              </ul>
+            </div>
               <div class="d-flex justify-content-start mt-2">
               <form action="{{ url_for('removedisparate') }}" method="POST" class="m-0">
                 <input type="hidden" name="attribute" value="{{ resultset[0] }}">
@@ -29,7 +39,7 @@
                   <input type="hidden" name="attribute" value="{{ resultset[0] }}">
                   <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
                   <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
-                  <button type="submit" class="btn btn-primary">Apply Resampling</button>
+                  <button type="submit" class="btn btn-primary">Apply Preferential Resampling</button>
                 </div>
                 </form>
             <br>

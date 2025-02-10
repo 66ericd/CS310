@@ -134,7 +134,7 @@ Score,Gender,Accepted,Predicted
 436,Female,0,0
 899,Male,0,0
 220,Female,0,0
-169,Male,0,1
+169,Male,0,0
 633,Male,1,1
 651,Male,0,0
 657,Female,1,1
@@ -201,7 +201,7 @@ Score,Gender,Accepted,Predicted
 447,Male,1,1
 881,Male,1,1
 803,Male,0,0
-164,Male,0,1
+164,Male,0,0
 466,Male,1,1
 220,Male,0,0
 15,Female,0,0
@@ -299,7 +299,7 @@ Score,Gender,Accepted,Predicted
 324,Male,0,0
 330,Female,0,0
 867,Male,1,1
-162,Male,0,1
+162,Male,0,0
 342,Female,0,0
 320,Male,0,0
 875,Female,1,1

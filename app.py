@@ -62,6 +62,29 @@ def evaluate():
     positive_outcome = request.form.get('positiveOutcome')
     for attribute in sensitive_attributes.split(","):
         resultset = fairness.outcome_summary(df, attribute, outcome_column, positive_outcome)
+        messages = []
+        underrepresented = []
+        underrepresented_rates = []
+        impacted = []
+        impacted_rates = []
+        total = sum(resultset[5])
+        for i in range(len(resultset[1])):
+            if resultset[5][i] < 0.5 * total / len(resultset[5]):
+                underrepresented.append(resultset[1][i])
+                underrepresented.append(round(resultset[5][i] / total) * 100)
+            if resultset[4][i] < 0.8:
+                impacted.append(resultset[1][i])
+                impacted_rates.append(resultset[2][i])
+        if len(underrepresented) == 1:
+            messages.append(f"Group {underrepresented[0]} is significantly underepresented, making up {underrepresented_rates[0]} percent of the population. <strong> Consider applying Preferential Resampling. </strong>")
+        elif len(underrepresented) > 1:
+            messages.append(f"Groups {', '.join(underrepresented)} are significantly underepresented, making up {',' .join(underrepresented_rates)} percent of the population respectively. <strong> Consider applying Preferential Resampling. </strong>")
+        best_positive_rate_index = resultset[2].index(max(resultset[2]))
+        if len(impacted) == 1:
+            messages.append(f"Group {impacted[0]} is disparately impacted (Positive outcome rate of {impacted_rates[0]}% vs. Group {resultset[1][best_positive_rate_index]} at {resultset[2][best_positive_rate_index]}%). <strong> Consider applying Disparate Impact Removal. </strong>")
+        elif len(impacted) > 1:
+            messages.append(f"Groups {', '.join(impacted)} are disparately impacted (Positive outcome rates of {', '.join(impacted_rates)} vs. Group {resultset[1][best_positive_rate_index]} at {resultset[2][best_positive_rate_index]}%) Consider applying Disparate Impact Removal.")
+        resultset.append(messages)
         resultsets.append(resultset)
     return render_template('evaluate.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes)
 
@@ -76,12 +99,49 @@ def evaluatepred():
     outcome_column = request.form.get('outcomeColumn')
     positive_outcome = request.form.get('positiveOutcome')
     prediction_column = request.form.get('predictionsColumn')
+    messages = []
+    impacted_pred = []
+    impacted_pred_rates = []
+    disparate_fpr = []
+    disparate_fpr_rates = []
+    disparate_fnr = []
+    disparate_fnr_rates = [] 
     for attribute in sensitive_attributes:
         resultsets[attribute] = []
         resultsets[attribute].append(fairness.actual_vs_predicted_summary(df, attribute, outcome_column, positive_outcome, prediction_column))
         resultsets[attribute].append(fairness.predicted_outcome_summary(df, attribute, outcome_column, positive_outcome, prediction_column))
+        predicted_rates = [resultsets[attribute][0][2][i] for i in range(1, len(resultsets[attribute][0][2]), 2)]
+        best_predicted_rate = max(predicted_rates)
+        best_predicted_group = resultsets[attribute][0][1][resultsets[attribute][0][2].index(best_predicted_rate)]
+        for j in range(len(predicted_rates)):
+            if predicted_rates[j] < best_predicted_rate * 0.8:
+                impacted_pred.append(resultsets[attribute][0][1][j].replace(" (predicted)", ""))
+                impacted_pred_rates.append(predicted_rates[j])
+        lowest_fpr_rate = min(resultsets[attribute][1][2])
+        lowest_fpr_group =  resultsets[attribute][1][1][resultsets[attribute][1][2].index(lowest_fpr_rate)]
+        lowest_fnr_rate = min(resultsets[attribute][1][3])
+        lowest_fnr_group =  resultsets[attribute][1][1][resultsets[attribute][1][3].index(lowest_fpr_rate)]
+        for k in range(len(resultsets[attribute][1][1])):
+            if resultsets[attribute][1][2][k] - 25 > lowest_fpr_rate:
+                disparate_fpr.append(resultsets[attribute][1][1][k])
+                disparate_fpr_rates.append(resultsets[attribute][1][2][k])
+            if resultsets[attribute][1][3][k] - 25 > lowest_fnr_rate:
+                disparate_fnr.append(resultsets[attribute][1][1][k])
+                disparate_fnr_rates.append(resultsets[attribute][1][3][k])
+        if len(impacted_pred) == 1:
+            messages.append(f"Group {impacted_pred[0]} is predicted positive outcomes at a disproportionately low frequency (Positive prediction rate of {impacted_pred_rates[0]}% vs. Group {best_predicted_group.replace(' (predicted)', '')} at {best_predicted_rate}%). <strong> Consider Postprocessing with a higher value of α, favouring Demographic Parity. </strong>")
+        elif len(impacted_pred) > 1:
+            messages.append(f"Groups {(', ').join(impacted_pred)} are predicted positive outcomes at a disproportionately low frequency (Positive prediction rates of {(', ').impacted_pred_rates} percent respectively vs. Group {best_predicted_group.replace(' (predicted)', '')} at {best_predicted_rate} percent). <strong> Consider Postprocessing with a higher value of α, favouring Demographic Parity. </strong>")
+        if len(disparate_fpr) == 1:
+            messages.append(f"Group {disparate_fpr[0]} receives false positives at a considerably higher rate than other groups. <strong> Consider Postprocessing with a lower value of α, favouring Equalized Odds. </strong>")
+        elif len(disparate_fpr) > 1:
+            messages.append(f"Groups {', '.join(disparate_fpr)} receive false positives at a considerably higher rate than other groups. <strong> Consider Postprocessing with a lower value of α, favouring Equalized Odds. </strong>")
+        if len(disparate_fnr) == 1:
+            messages.append(f"Group {disparate_fnr[0]} receives false negatives at a considerably higher rate than other groups. <strong> Consider Postprocessing with a lower value of α, favouring Equalized Odds. </strong>")
+        elif len(disparate_fnr) > 1:
+            messages.append(f"Groups {', '.join(disparate_fnr)} receive false negatives at a considerably higher rate than other groups. <strong> Consider Postprocessing with a lower value of α, favouring Equalized Odds. </strong>")
+        resultsets[attribute].append(messages)
     return render_template('evaluatepred.html', resultsets=resultsets, outcome_column=outcome_column, positive_outcome=positive_outcome, sensitive_attributes=sensitive_attributes, prediction_column=prediction_column)
-
 
 @app.route('/removedisparate', methods=['POST'])
 def removedisparate():

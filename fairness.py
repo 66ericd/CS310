@@ -18,7 +18,8 @@ def outcome_summary(df, sensitive_attr, outcome, positive_value):
     positive = summary_percentages[positive_value].round(1).tolist()
     negative = [100 - i for i in positive]
     disparate_impact = summary_percentages['Disparate Impact Ratio'].round(3).tolist()
-    return [sensitive_attr, x_axis, positive, negative, disparate_impact]
+    totals = totals.tolist()
+    return [sensitive_attr, x_axis, positive, negative, disparate_impact, totals]
 
 def predicted_outcome_summary(df, sensitive_attr, outcome, positive_value, predictions):
     x_axis = []  
