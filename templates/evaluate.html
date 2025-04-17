@@ -10,8 +10,8 @@
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;AI Fairness Toolkit</a>
+      <div class="container">
+        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;Fair AI Toolkit</a>
       </div>
     </nav>
     <div class="container mt-5">
@@ -24,7 +24,7 @@
             <div class="alert alert-primary" role="alert">
               <ul>
               {% for message in resultset[6] %}
-               • {{ message | safe}}<br>
+               <strong>• {{ message | safe}}</strong><br>
               {% endfor %}
               </ul>
             </div>
@@ -53,6 +53,9 @@
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="disparate-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#disparate{{ loop.index }}" type="button" role="tab" aria-controls="disparate{{ loop.index }}" aria-selected="false">Disparate Impact Ratio</button>
               </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="size-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#size{{ loop.index }}" type="button" role="tab" aria-controls="size{{ loop.index }}" aria-selected="false">Group Size</button>
+              </li>
             </ul>
 
             <div class="tab-content mt-3" id="tabContent{{ loop.index }}">
@@ -64,6 +67,9 @@
               </div>
               <div class="tab-pane fade" id="disparate{{ loop.index }}" role="tabpanel" aria-labelledby="disparate-tab-{{ loop.index }}">
                 <canvas id="disparateImpactChart{{ loop.index }}" width="400" height="200"></canvas>
+              </div>
+              <div class="tab-pane fade" id="size{{ loop.index }}" role="tabpanel" aria-labelledby="size-{{ loop.index }}">
+                <canvas id="sizeChart{{ loop.index }}" width="400" height="200"></canvas>
               </div>
             </div>
           </div>
@@ -78,6 +84,7 @@
           const positiveData{{ loop.index }} = {{ resultset[2] | tojson }};
           const negativeData{{ loop.index }} = {{ resultset[3] | tojson }};
           const disparateData{{ loop.index }} = {{ resultset[4] | tojson }};
+          const sizeData{{ loop.index }} = {{ resultset[5] | tojson }}
           
           new Chart(document.getElementById('positiveImpactChart{{ loop.index }}').getContext('2d'), {
             type: 'bar',
@@ -130,6 +137,27 @@
                 data: disparateData{{ loop.index }},
                 backgroundColor: 'rgba(153, 102, 255, 0.6)',
                 borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+          
+          new Chart(document.getElementById('sizeChart{{ loop.index }}').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labels{{ loop.index }},
+              datasets: [{
+                label: 'Group Size',
+                data: sizeData{{ loop.index }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
               }]
             },

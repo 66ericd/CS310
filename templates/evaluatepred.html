@@ -10,105 +10,110 @@
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;AI Fairness Toolkit</a>
+        <div class="container">
+          <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;Fair AI Toolkit</a>
         </div>
     </nav>
+    
     <div class="container mt-5">
         <h1>Evaluation Results (Predictions)</h1>
         <br>
+
         {% for attribute in sensitive_attributes %}
         <div class="mb-4 border p-3 rounded">
           <h2>{{ attribute }} - Outcome Analysis</h2>
           <br>
           <div class="alert alert-primary" role="alert">
             {% for message in resultsets[attribute][2] %}
-            {{ message | safe}}
-            {% if loop.index != resultsets[attribute][2]|length %}
+            <strong>{{ message | safe }}</strong>
+            {% if loop.index != resultsets[attribute][2] | length %}
             <hr>
             {% endif %}
             {% endfor %}
           </div>
-<div class="d-flex flex-column align-items-start mt-2">
-  <form action="{{ url_for('postprocessing') }}" method="POST" class="w-100 position-relative">
-    <div class="d-flex align-items-center w-100 position-relative">
-      <div class="text-center me-2">
-        <span><strong>α=0</strong></span><br>
-        <small>Equalized Odds</small>
-      </div>
 
-      <div class="position-relative" style="width: 33%;">
-        <div id="tooltipContainer" class="position-absolute" style="top: -40px; left: 0; transform: translateX(-50%); display: none;">
-          <div class="tooltip bs-tooltip-top show" role="tooltip">
-            <div class="tooltip-arrow" style="position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);"></div>
-            <div class="tooltip-inner text-white bg-dark p-1 rounded" id="tooltipText"></div>
-          </div>
-        </div>
-
-        <input type="range" class="form-range w-100" id="alphaRange" min="0" max="1" step="0.1">
-      </div>
-
-      <div class="text-center ms-2">
-        <span><strong>α=1</strong></span><br>
-        <small>Demographic Parity</small>
-      </div>
-    </div>
-
-    <input type="hidden" name="alphaValue" id="alphaValue">
-    <input type="hidden" name="attribute" value="{{ attribute }}">
-    <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
-    <input type="hidden" name="predictionColumn" value="{{ prediction_column }}">
-    <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
-
-    <button type="submit" class="btn btn-primary mt-3">Apply Post-Processing</button>
-  </form>
-</div>
-              <br>
-            <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pos-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pos{{ loop.index }}" type="button" role="tab" aria-controls="pos{{ loop.index }}" aria-selected="true">Positive Outcomes</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="neg-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#neg{{ loop.index }}" type="button" role="tab" aria-controls="neg{{ loop.index }}" aria-selected="false">Negative Outcomes</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="false">False Positive Rate</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="fnr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fnr{{ loop.index }}" type="button" role="tab" aria-controls="fnr{{ loop.index }}" aria-selected="false">False Negative Rate</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pa-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pa{{ loop.index }}" type="button" role="tab" aria-controls="pa{{ loop.index }}" aria-selected="false">Prediction Accuracy</button>
-              </li>
-            </ul>
-
-            <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
-              <div class="tab-pane fade show active" id="pos{{ loop.index }}" role="tabpanel" aria-labelledby="pos-tab-{{ loop.index }}">
-                <canvas id="posChart{{ loop.index }}" width="400" height="200"></canvas>
-              </div>
-              <div class="tab-pane fade" id="neg{{ loop.index }}" role="tabpanel" aria-labelledby="neg-tab-{{ loop.index }}">
-                <canvas id="negChart{{ loop.index }}" width="400" height="200"></canvas>
-              </div>
-              <div class="tab-pane fade" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
-                <div class="alert alert-light" role="alert">
-                    A difference of <strong>{{ ((resultsets[attribute])[1][2] | max) - (resultsets[attribute][1][2] | min) }}%</strong> was found across false positive rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FPRs and FNRs.
+          <div class="d-flex flex-column align-items-start mt-2">
+            <form action="{{ url_for('postprocessing') }}" method="POST" class="w-100 position-relative">
+              <div class="d-flex align-items-center w-100 position-relative">
+                <div class="text-center me-2">
+                  <span><strong>α=0</strong></span><br>
+                  <small>Equalized Odds</small>
                 </div>
-                <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
+
+                <div class="position-relative" style="width: 33%;">
+                  <div id="tooltipContainer" class="position-absolute" style="top: -40px; left: 0; transform: translateX(-50%); display: none;">
+                    <div class="tooltip bs-tooltip-top show" role="tooltip">
+                      <div class="tooltip-arrow" style="position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);"></div>
+                      <div class="tooltip-inner text-white bg-dark p-1 rounded" id="tooltipText"></div>
+                    </div>
+                  </div>
+
+                  <input type="range" name="alphaRange" class="form-range w-100" id="alphaRange" min="0" max="1" step="0.1">
+                </div>
+
+                <div class="text-center ms-2">
+                  <span><strong>α=1</strong></span><br>
+                  <small>Demographic Parity</small>
+                </div>
               </div>
-              <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
-                <div class="alert alert-light" role="alert">
-                    A difference of <strong>{{ (resultsets[attribute][1][3] | max) - (resultsets[attribute][1][3] | min) }}%</strong> was found across false negative rates. <strong>Equalised odds</strong> is said to be satisified when this is minimised across both FNRs and FPRs.
-                </div>                
-                <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
+
+              <input type="hidden" name="alphaValue" id="alphaValue">
+              <input type="hidden" name="attribute" value="{{ attribute }}">
+              <input type="hidden" name="outcomeColumn" value="{{ outcome_column }}">
+              <input type="hidden" name="predictionColumn" value="{{ prediction_column }}">
+              <input type="hidden" name="positiveOutcome" value="{{ positive_outcome }}">
+
+              <button type="submit" class="btn btn-primary mt-3">Apply Post-Processing</button>
+            </form>
+          </div>
+
+          <br>
+          <ul class="nav nav-tabs" id="metricsTab{{ loop.index }}" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="pos-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pos{{ loop.index }}" type="button" role="tab" aria-controls="pos{{ loop.index }}" aria-selected="true">Positive Outcomes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="neg-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#neg{{ loop.index }}" type="button" role="tab" aria-controls="neg{{ loop.index }}" aria-selected="false">Negative Outcomes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="fpr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fpr{{ loop.index }}" type="button" role="tab" aria-controls="fpr{{ loop.index }}" aria-selected="false">False Positive Rate</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="fnr-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#fnr{{ loop.index }}" type="button" role="tab" aria-controls="fnr{{ loop.index }}" aria-selected="false">False Negative Rate</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pa-tab-{{ loop.index }}" data-bs-toggle="tab" data-bs-target="#pa{{ loop.index }}" type="button" role="tab" aria-controls="pa{{ loop.index }}" aria-selected="false">Prediction Accuracy</button>
+            </li>
+          </ul>
+
+          <div class="tab-content mt-3" id="metricsTabContent{{ loop.index }}">
+            <div class="tab-pane fade show active" id="pos{{ loop.index }}" role="tabpanel" aria-labelledby="pos-tab-{{ loop.index }}">
+              <canvas id="posChart{{ loop.index }}" width="400" height="200"></canvas>
+            </div>
+            <div class="tab-pane fade" id="neg{{ loop.index }}" role="tabpanel" aria-labelledby="neg-tab-{{ loop.index }}">
+              <canvas id="negChart{{ loop.index }}" width="400" height="200"></canvas>
+            </div>
+            <div class="tab-pane fade" id="fpr{{ loop.index }}" role="tabpanel" aria-labelledby="fpr-tab-{{ loop.index }}">
+              <div class="alert alert-light" role="alert">
+                A difference of <strong>{{ ((resultsets[attribute])[1][2] | max) - (resultsets[attribute][1][2] | min) }}%</strong> was found across false positive rates. <strong>Equalized odds</strong> is said to be satisfied when this is minimized across both FPRs and FNRs.
               </div>
-              <div class="tab-pane fade" id="pa{{ loop.index }}" role="tabpanel" aria-labelledby="pa-tab-{{ loop.index }}">
-                <canvas id="paChart{{ loop.index }}" width="400" height="200"></canvas>
-              </div>
+              <canvas id="fprChart{{ loop.index }}" width="400" height="200"></canvas>
+            </div>
+            <div class="tab-pane fade" id="fnr{{ loop.index }}" role="tabpanel" aria-labelledby="fnr-tab-{{ loop.index }}">
+              <div class="alert alert-light" role="alert">
+                A difference of <strong>{{ (resultsets[attribute][1][3] | max) - (resultsets[attribute][1][3] | min) }}%</strong> was found across false negative rates. <strong>Equalized odds</strong> is said to be satisfied when this is minimized across both FNRs and FPRs.
+              </div>                
+              <canvas id="fnrChart{{ loop.index }}" width="400" height="200"></canvas>
+            </div>
+            <div class="tab-pane fade" id="pa{{ loop.index }}" role="tabpanel" aria-labelledby="pa-tab-{{ loop.index }}">
+              <canvas id="paChart{{ loop.index }}" width="400" height="200"></canvas>
             </div>
           </div>
-          </div>
+        </div>
         {% endfor %}
     </div>
+  </body>
+</html>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         let slider = document.getElementById("alphaRange");
@@ -155,7 +160,9 @@
               datasets: [{
                 label: 'Positive Outcomes (%)',
                 data: posData{{ loop.index }},
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                backgroundColor: posData{{ loop.index }}.map((_, index) => 
+                index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+            ),
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
               }]
@@ -176,7 +183,9 @@
               datasets: [{
                 label: 'Negative Outcones (%)',
                 data: negData{{ loop.index }},
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                backgroundColor: posData{{ loop.index }}.map((_, index) => 
+                index % 2 === 1 ? 'rgba(255, 99, 132, 0.4)' : 'rgba(255, 99, 132, 1)'
+            ),
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1
               }]
@@ -197,7 +206,9 @@
               datasets: [{
                 label: 'False Positive Rate (%)',
                 data: fprData{{ loop.index }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                backgroundColor: posData{{ loop.index }}.map((_, index) => 
+                index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+            ),
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
               }]
@@ -218,7 +229,9 @@
               datasets: [{
                 label: 'False Negative Rate (%)',
                 data: fnrData{{ loop.index }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                backgroundColor: posData{{ loop.index }}.map((_, index) => 
+                index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+            ),
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
               }]
@@ -239,7 +252,9 @@
               datasets: [{
                 label: 'Prediction Accuracy (%)',
                 data: paData{{ loop.index }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                backgroundColor: posData{{ loop.index }}.map((_, index) => 
+                index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+            ),
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
               }]

@@ -10,14 +10,29 @@
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;AI Fairness Toolkit</a>
+      <div class="container">
+        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;Fair AI Toolkit</a>
     </div>
     </nav>
     <div class="container mt-5">
     <h2>Disparate Impact Removal Results</h2>
+    <script>
+                const predefinedColors = [
+            '#4bc0c066', 
+            '#4bc0c0', 
+            '#33FF57', 
+            '#FFC300',
+            '#DAF7A6', 
+            '#FF33C4', 
+            '#C70039', 
+            '#900C3F', 
+            '#581845', 
+            '#2ECC71'  
+        ];
+    </script>
     {% for result in resultsets %}
-    <div class="shadow p-3 mb-5 bg-body rounded">
+    {% if result.column == "hours-per-week" %}
+    <div class="mb-4 border p-3 rounded">
         <h3>Distributions of attribute: {{ result.column }}</h3>
         <div>
              <h4>Original Dataset</h4>
@@ -29,19 +44,6 @@
         </div>
       </div>
       <script>
-        const predefinedColors = [
-            '#FF5733', 
-            '#3357FF', 
-            '#33FF57', 
-            '#FFC300',
-            '#DAF7A6', 
-            '#FF33C4', 
-            '#C70039', 
-            '#900C3F', 
-            '#581845', 
-            '#2ECC71'  
-        ];
-
         function getColor(index) {
             return predefinedColors[index % predefinedColors.length];
         }
@@ -110,6 +112,7 @@
             }
         });
     </script>
+{% endif %}
 {% endfor %}
     </div>
     <script>

@@ -10,8 +10,8 @@
   </head>
   <body>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;AI Fairness Toolkit</a>
+      <div class="container">
+        <a class="navbar-brand" href="/"><i class="bi bi-wrench-adjustable"></i>&nbsp;Fair AI Toolkit</a>
       </div>
     </nav>
     <div class="container mt-5">
@@ -69,7 +69,9 @@
                 datasets: [{
                   label: 'Positive Outcomes Predicted (%)',
                   data: posData,
-                  backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                  backgroundColor: labels.map((_, index) => 
+            index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+          ),
                   borderColor: 'rgba(75, 192, 192, 1)',
                   borderWidth: 1
                 }]
@@ -90,7 +92,9 @@
                 datasets: [{
                   label: 'Negative Outcones Predicted (%)',
                   data: negData,
-                  backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                  backgroundColor: labels.map((_, index) => 
+            index % 2 === 1 ? 'rgba(255, 99, 132, 0.4)' : 'rgba(255, 99, 132, 1)'
+          ),
                   borderColor: 'rgba(255, 99, 132, 1)',
                   borderWidth: 1
                 }]
@@ -111,7 +115,9 @@
                 datasets: [{
                   label: 'False Positive Rate (%)',
                   data: fprData,
-                  backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                  backgroundColor: labels.map((_, index) => 
+            index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+          ),
                   borderColor: 'rgba(54, 162, 235, 1)',
                   borderWidth: 1
                 }]
@@ -132,7 +138,9 @@
                 datasets: [{
                   label: 'False Negative Rate (%)',
                   data: fnrData,
-                  backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                  backgroundColor: labels.map((_, index) => 
+            index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+          ),
                   borderColor: 'rgba(54, 162, 235, 1)',
                   borderWidth: 1
                 }]
@@ -153,7 +161,9 @@
                 datasets: [{
                   label: 'Prediction Accuracy (%)',
                   data: paData,
-                  backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                  backgroundColor: labels.map((_, index) => 
+            index % 2 === 1 ? 'rgba(75, 192, 192, 0.4)' : 'rgba(75, 192, 192, 1)'
+          ),
                   borderColor: 'rgba(54, 162, 235, 1)',
                   borderWidth: 1
                 }]
